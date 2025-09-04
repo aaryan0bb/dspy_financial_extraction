@@ -9,14 +9,46 @@
 
 ## 🎯 Overview
 
-This repository contains a comprehensive pipeline for extracting structured financial knowledge from unstructured text documents. Built on Stanford's DSPy framework, it uses advanced prompt optimization techniques including MIPRO (Multi-Instruction Prompt Optimization) to achieve high-quality entity-relationship extraction.
+This repository contains a comprehensive, production-ready pipeline for extracting structured financial knowledge from unstructured text documents. Built on Stanford's DSPy framework, it features a modular architecture with multiple training approaches and production-ready inference tools.
+
+### 🏗️ Repository Structure
+
+```
+dspy_financial_extraction/
+├── preprocessing/         # 📄 PDF Processing (NEW!)
+│   ├── pdf_enricher.py   # PDF → Enriched text with visual analysis
+│   └── __init__.py       # Module exports
+├── src/                  # 🧠 Core modules
+│   ├── config.py         # LLM configuration & API setup
+│   ├── signatures.py     # DSPy signature definitions  
+│   ├── extractors.py     # Core extractor classes
+│   └── metrics.py        # Evaluation metrics
+├── training/             # 🎯 Training pipelines
+│   ├── bootstrap_trainer.py      # Bootstrap Few-Shot optimization
+│   ├── mipro_trainer.py          # MIPRO with Pydantic validation
+│   ├── mipro_trainer_basic.py    # Basic MIPRO optimization  
+│   └── quality_evaluator.py     # LLM judge evaluation
+├── inference/            # 🚀 Production tools
+│   ├── batch_processor.py       # Batch text processing
+│   └── model_runner.py          # Production inference
+├── examples/             # 📚 Usage demonstrations
+│   ├── financial_report_demo.py # Real-world examples
+│   └── end_to_end_demo.py       # Complete PDF→KG pipeline
+├── prompts/              # 📝 Prompt templates
+│   └── triplet_extraction.md    # Domain-specific prompt
+├── requirements.txt      # 📦 Dependencies (updated)
+├── .env.example         # ⚙️ Environment template (updated)
+└── README.md            # 📖 Documentation
+```
 
 ### Key Features
 
+- **📄 Complete PDF Processing**: PDF → Enriched Text using LLMWhisperer + Gemini Vision
+- **🖼️ Visual Analysis**: Automatically processes charts, graphs, and tables in financial documents
 - **🚀 MIPRO Optimization**: Automated few-shot prompt optimization with 40%+ accuracy improvements
 - **📊 Structured Output**: Pydantic-validated knowledge graphs with entities, relationships, and scenarios
 - **🎯 Financial Domain**: Specialized for financial documents (research reports, filings, news)
-- **🔄 Multi-Stage Pipeline**: From basic triplet extraction to complex knowledge graphs
+- **🔄 End-to-End Pipeline**: From raw PDFs to structured knowledge graphs
 - **📈 Quality Metrics**: Built-in evaluation using GPT-4 as judge
 - **⚡ Production Ready**: Robust error handling and batch processing capabilities
 
@@ -24,25 +56,52 @@ This repository contains a comprehensive pipeline for extracting structured fina
 
 ```mermaid
 graph TD
-    A[Raw Financial Text] --> B[DSPy Signature]
-    B --> C[MIPRO Optimizer]
-    C --> D[Few-Shot Examples]
-    D --> E[Optimized Extractor]
-    E --> F[Pydantic Validation]
-    F --> G[Knowledge Graph JSON]
-    G --> H[Neo4j Database]
+    A[Raw PDF] --> B[LLMWhisperer Text Extract]
+    A --> C[MinerU Figure Detection]
+    C --> D[Gemini Vision Analysis]
+    B --> E[Text + Figure Descriptions]
+    D --> E
+    E --> F[DSPy Signature]
+    F --> G[MIPRO Optimizer]
+    G --> H[Few-Shot Examples]
+    H --> I[Optimized Extractor]
+    I --> J[Pydantic Validation]
+    J --> K[Knowledge Graph JSON]
 ```
 
 ## 📋 Pipeline Components
 
+### **📄 PDF Processing (`preprocessing/`)**
 | Module | Description | Key Features |
 |--------|-------------|--------------|
-| `DSPy_Triplet_Extraction_Optimization.py` | Core extraction with Bootstrap optimization | Entity/Relationship/Scenario extraction |
-| `mipro_pydantic_pipeline.py` | Production pipeline with Pydantic schemas | Type-safe outputs, validation |
-| `mipro_llm_judge_pipeline.py` | Quality evaluation using GPT-4 judge | Automated quality assessment |
-| `o3_triplet_extractor.py` | CLI utility for batch processing | Concurrent processing, auto-incremental outputs |
-| `nomura_dspy_example.py` | Financial research report example | Real-world financial document processing |
-| `updated_triplet_prompt.md` | Comprehensive extraction prompt | 270+ line domain-specific prompt |
+| `preprocessing/pdf_enricher.py` | **Complete PDF processing pipeline** | LLMWhisperer + MinerU + Gemini Vision |
+
+### **🧠 Core Modules (`src/`)**
+| Module | Description | Key Features |
+|--------|-------------|--------------|
+| `src/config.py` | LLM configuration & API setup | Centralized model configuration |
+| `src/signatures.py` | DSPy signature definitions | All extraction task interfaces |
+| `src/extractors.py` | Core extractor classes | TripletExtractor, Pydantic models |
+| `src/metrics.py` | Evaluation metrics | Quality assessment functions |
+
+### **🎯 Training Pipelines (`training/`)**
+| Module | Description | Key Features |
+|--------|-------------|--------------|
+| `training/bootstrap_trainer.py` | Bootstrap Few-Shot optimization | Entity/Relationship/Scenario extraction |
+| `training/mipro_trainer.py` | MIPRO with Pydantic validation | Type-safe outputs, semantic metrics |
+| `training/mipro_trainer_basic.py` | Basic MIPRO optimization | Simple configuration, fast training |
+| `training/quality_evaluator.py` | LLM judge evaluation | GPT-4 based quality assessment |
+
+### **🚀 Production Tools (`inference/`)**
+| Module | Description | Key Features |
+|--------|-------------|--------------|
+| `inference/batch_processor.py` | Batch text processing | Concurrent processing, deduplication |
+| `inference/model_runner.py` | **Production inference** | Load optimized models, flexible I/O |
+
+### **📚 Examples (`examples/`)**
+| Module | Description | Key Features |
+|--------|-------------|--------------|
+| `examples/financial_report_demo.py` | Real-world usage demo | Complete workflow demonstration |
 
 ## 🚀 Quick Start
 
@@ -64,31 +123,68 @@ export OPENAI_API_KEY="your_openai_api_key_here"
 
 ```python
 import os
-from mipro_pydantic_pipeline import configure_llm, extract_knowledge_graph
+from src.config import configure_llm
+from src.extractors import TripletExtractor
+from training.mipro_trainer import extract_knowledge_graph
 
 # Set up API key and configure LLM
 os.environ["OPENAI_API_KEY"] = "your_key_here"
 configure_llm()
 
-# Extract from text
+# Method 1: Basic extraction
+extractor = TripletExtractor()
 text = "Apple Inc. reported Q3 revenue of $81.8B, up 1% YoY..."
-knowledge_graph = extract_knowledge_graph(text)
+result = extractor.forward(text)
 
-print(f"Entities: {len(knowledge_graph.entities)}")
-print(f"Relationships: {len(knowledge_graph.relationships)}")
+print(f"Entities: {len(result.get('entities', []))}")
+print(f"Relationships: {len(result.get('relationships', []))}")
+
+# Method 2: Pydantic-validated extraction
+knowledge_graph = extract_knowledge_graph(text)
+print(f"Validated entities: {len(knowledge_graph.entities)}")
 ```
 
 ### CLI Usage
 
 ```bash
-# Process text chunks with O3 extractor
-python o3_triplet_extractor.py
+# Training workflows
+python -m training.bootstrap_trainer
+python -m training.mipro_trainer
+python -m training.mipro_trainer_basic
+python -m training.quality_evaluator
 
-# Run MIPRO optimization pipeline
-python mipro_pydantic_pipeline.py
+# Batch processing
+python -m inference.batch_processor --input ./documents/ --output ./results/
 
-# Run DSPy optimization with bootstrap
-python DSPy_Triplet_Extraction_Optimization.py
+# Production inference
+python -m inference.model_runner --program ./saved_models/optimized_program --input document.txt
+
+# Run examples
+python -m examples.financial_report_demo
+```
+
+## 🔄 Production Workflow
+
+### 1. Train & Optimize
+```bash
+# Train with different optimization methods
+python -m training.bootstrap_trainer        # Bootstrap Few-Shot
+python -m training.mipro_trainer           # MIPRO with Pydantic
+python -m training.mipro_trainer_basic     # Basic MIPRO
+python -m training.quality_evaluator      # LLM Judge evaluation
+# These save optimized models to ./results/optimized_program/
+```
+
+### 2. Run Inference  
+```bash
+# Single file
+python -m inference.model_runner --program ./results/optimized_program --input document.txt
+
+# Directory batch processing
+python -m inference.model_runner --program ./results/optimized_program --input ./docs/ --out ./results/
+
+# Direct text input
+python -m inference.model_runner --program ./results/optimized_program --chunk_text "Apple reported..." --out ./results/
 ```
 
 ## 📊 Results & Performance
