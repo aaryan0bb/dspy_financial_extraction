@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # Put your OpenAI key here or in the OPENAI_API_KEY env variable
-OPENAI_API_KEY = "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"  # <- replace
+OPENAI_API_KEY = ""  # <- replace
 
 JUDGE_MODEL = "o3"  # Judge LLM – uses Completion endpoint
 EXTRACT_MODEL_ALIAS = "openai/gpt-4o"  # Used by DSPy extractor

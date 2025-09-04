@@ -26,10 +26,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ─────────────────── LLM CONFIG ───────────────────
-OPENAI_API_KEY = "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"  # <-- put your key here
-
+OPENAI_API_KEY = ""  # <-- put your key here
+    
 dspy.settings.configure(lm=dspy.LM("openai/o4-mini", temperature=1.0, max_tokens=20000))
-litellm.drop_params = True
+litellm.drop_params = True  #to drop parameters to avoid leaking information
 logger.info("✅ LLM ready (o4-mini)")
 
 # ─────────────────── LLM CONFIG HELPER (matches base pipeline) ───────────────────

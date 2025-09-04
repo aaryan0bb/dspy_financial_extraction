@@ -128,7 +128,7 @@ Return JSON only."""
 # 2. SIMPLE LLM CONFIGURATION
 # ============================================================================
 
-OPENAI_API_KEY = "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"  # Replace with your actual API key
+OPENAI_API_KEY = ""  # Replace with your actual API key
 
 def configure_llm():
     """Configure DSPy to use OpenAI."""
