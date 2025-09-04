@@ -57,21 +57,22 @@ cd dspy-financial-extraction
 pip install -r requirements.txt
 
 # Set up environment variables
-cp .env.example .env
-# Edit .env with your API keys
+export OPENAI_API_KEY="your_openai_api_key_here"
 ```
 
 ### Basic Usage
 
 ```python
-from mipro_pydantic_pipeline import FinancialExtractor
+import os
+from mipro_pydantic_pipeline import configure_llm, extract_knowledge_graph
 
-# Initialize extractor
-extractor = FinancialExtractor()
+# Set up API key and configure LLM
+os.environ["OPENAI_API_KEY"] = "your_key_here"
+configure_llm()
 
 # Extract from text
 text = "Apple Inc. reported Q3 revenue of $81.8B, up 1% YoY..."
-knowledge_graph = extractor.extract(text)
+knowledge_graph = extract_knowledge_graph(text)
 
 print(f"Entities: {len(knowledge_graph.entities)}")
 print(f"Relationships: {len(knowledge_graph.relationships)}")
@@ -80,14 +81,14 @@ print(f"Relationships: {len(knowledge_graph.relationships)}")
 ### CLI Usage
 
 ```bash
-# Process single document
-python o3_triplet_extractor.py --file document.txt
+# Process text chunks with O3 extractor
+python o3_triplet_extractor.py
 
-# Batch process directory
-python o3_triplet_extractor.py --input-dir ./documents/ --output-dir ./results/
+# Run MIPRO optimization pipeline
+python mipro_pydantic_pipeline.py
 
-# Run optimization pipeline
-python mipro_pydantic_pipeline.py --optimize --shots 50
+# Run DSPy optimization with bootstrap
+python DSPy_Triplet_Extraction_Optimization.py
 ```
 
 ## 📊 Results & Performance
@@ -179,11 +180,7 @@ class FinancialExtractionSignature(dspy.Signature):
 ### Environment Variables
 
 ```bash
-OPENAI_API_KEY=your_openai_api_key
-GEMINI_API_KEY=your_gemini_api_key  # Optional for hybrid processing
-NEO4J_URI=bolt://localhost:7687     # Optional for graph storage
-NEO4J_USER=neo4j
-NEO4J_PASSWORD=your_password
+OPENAI_API_KEY=your_openai_api_key  # Required - OpenAI API key for LLM calls
 ```
 
 ### Custom Prompts
@@ -230,7 +227,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/yourusername/dspy-financial-extraction/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/dspy-financial-extraction/discussions)
-- **Email**: your.email@domain.com
+- **Email**: aaryangoel2002@gmail.com
 
 ## 🙏 Acknowledgments
 
@@ -238,9 +235,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [OpenAI](https://openai.com) for GPT models used in optimization
 - Financial data providers and research institutions
 
-## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/dspy-financial-extraction&type=Date)](https://star-history.com/#yourusername/dspy-financial-extraction&Date)
 
 ---
 
